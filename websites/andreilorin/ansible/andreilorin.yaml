@@ -11,8 +11,8 @@
       state: latest
 #  - name: write the nginx config file
 #    template:
-#      src: /srv/httpd.j2
-#      dest: /etc/httpd.conf
+#      src: /srv/nginx.conf
+#      dest: /etc/nginx.conf
     notify:
     - restart nginx
   - name: ensure nginx is running
