@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+
+  jenkins:
+    ports:
+      - '13000:8080'
+    volumes:
+      - 'jenkins_volume:/var/jenkins_home'
+    container_name: jenkins
+    networks:
+      - localcicd
+    restart: always
+    image: 'jenkins/jenkins:lts'
+
+  docker-proxy:
+    ports:
+      - '13001:2375'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    container_name: docker-proxy
+    restart: always
+    image: shipyard/docker-proxy
+
+  gitlab:
+    ports:
+      - '13002:80'
+    container_name: gitlab
+    restart: always
+    image: gitlab/gitlab-ce
+
+  keycloak:
+    ports:
+      - '13003:8080'
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+    container_name: keycloack
+    restart: always
+    image: 'quay.io/keycloak/keycloak:latest'
+
+  sonarqube:
+    ports:
+      - '13004:9000'
+    volumes:
+      - 'sonarqube_volume:/opt/sonarqube'
+    container_name: sonarqube
+    networks: localcicd
+    restart: always
+    image: sonarqube
+
+  artifactory:
+    ports:
+      - '13005:8081'
+      - '13006:8082'
+    volumes:
+      - 'artifactory_volume:/var/opt/jfrog/artifactory'
+    container_name: artifactory
+    restart: always
+    image: 'docker.bintray.io/jfrog/artifactory-oss:latest'
+
+  nexus:
+    ports:
+      - '13007:8081'
+    volumes:
+      - 'nexus-data:/nexus-data'
+    container_name: nexus
+    networks:
+      - localcicd
+    restart: always
+    image: sonatype/nexus3
+
+  networks:
+    localcicd:
