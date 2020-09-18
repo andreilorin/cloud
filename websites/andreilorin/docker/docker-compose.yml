@@ -3,73 +3,77 @@ version: '3.8'
 services:
 
   jenkins:
+    image: 'jenkins/jenkins:lts'
+    container_name: jenkins
     ports:
       - '13000:8080'
     volumes:
       - 'jenkins-volume:/var/jenkins_home'
-    container_name: jenkins
     networks:
       - localcicd
     restart: always
-    image: 'jenkins/jenkins:lts'
 
   docker-proxy:
+    image: 'shipyard/docker-proxy'
+    container_name: docker-proxy
     ports:
       - '13001:2375'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
-    container_name: docker-proxy
     restart: always
-    image: shipyard/docker-proxy
 
   gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    container_name: gitlab
     ports:
       - '13002:80'
-    container_name: gitlab
+    hostname: 'gitlab.aeontree.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.aeontree.com'
     restart: always
-    image: gitlab/gitlab-ce
 
   keycloak:
+    image: 'quay.io/keycloak/keycloak:latest'
+    container_name: keycloack
     ports:
       - '13003:8080'
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
-    container_name: keycloack
     restart: always
-    image: 'quay.io/keycloak/keycloak:latest'
 
   sonarqube:
+    image: 'sonarqube'
+    container_name: sonarqube
     ports:
       - '13004:9000'
     volumes:
       - 'sonarqube-volume:/opt/sonarqube'
-    container_name: sonarqube
     networks:
       - localcicd
     restart: always
-    image: sonarqube
 
   artifactory:
+    image: 'docker.bintray.io/jfrog/artifactory-oss:latest'
+    container_name: artifactory
     ports:
       - '13005:8081'
       - '13006:8082'
     volumes:
       - 'artifactory-volume:/var/opt/jfrog/artifactory'
-    container_name: artifactory
     restart: always
-    image: 'docker.bintray.io/jfrog/artifactory-oss:latest'
 
   nexus:
+    image: 'sonatype/nexus3'
+    container_name: nexus
     ports:
       - '13007:8081'
     volumes:
       - 'nexus-volume:/nexus-data'
-    container_name: nexus
     networks:
       - localcicd
     restart: always
-    image: sonatype/nexus3
 
 volumes:
   artifactory-volume:
