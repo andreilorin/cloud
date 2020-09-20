@@ -20,17 +20,25 @@ services:
       - '13001:2375'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - localcicd
     restart: always
 
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
     container_name: gitlab
+    hostname: 'gitlab.aeontree.com'
+    #    environment:
+    #      GITLAB_OMNIBUS_CONFIG: |
+    #        external_url 'http://gitlab.aeontree.com'
     ports:
       - '13002:80'
-    hostname: 'gitlab.aeontree.com'
-    environment:
-      GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://gitlab.aeontree.com'
+    volumes:
+      - $HOME/dev/docker-volumes/gitlab/config:/etc/gitlab
+      - $HOME/dev/docker-volumes/gitlab/data:/var/opt/gitlab
+      - $HOME/dev/docker-volumes/gitlab/logs:/var/log/gitlab
+    networks:
+      - localcicd
     restart: always
 
   keycloak:
@@ -39,8 +47,10 @@ services:
     ports:
       - '13003:8080'
     environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_USER=admin       # TODO use env var
+      - KEYCLOAK_PASSWORD=admin   # TODO use env var
+    networks:
+      - localcicd
     restart: always
 
   sonarqube:
@@ -61,7 +71,9 @@ services:
       - '13005:8081'
       - '13006:8082'
     volumes:
-      - 'artifactory-volume:/var/opt/jfrog/artifactory'
+      - 'artifactory-volume:/var/opt/jfrog/artifactory' # change named volume to host volume
+    networks:
+      - localcicd
     restart: always
 
   nexus:
@@ -75,10 +87,21 @@ services:
       - localcicd
     restart: always
 
+  portainer:
+    image: 'portainer/portainer-ce'
+    container_name: portainer
+    ports:
+#      - '8000:8000' # used by EDGE agent
+      - '13008:9000'
+    volumes:
+    - '/var/run/docker.sock:/var/run/docker.sock'
+    - 'portainer_data:/data' # change named volume to host volume
+
 volumes:
   artifactory-volume:
   jenkins-volume:
   nexus-volume:
+  portainer_data:
   sonarqube-volume:
 
 networks:
