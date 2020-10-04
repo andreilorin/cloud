@@ -14,5 +14,3 @@ else
 
   sed -i '0,/PermitRootLogin/s/yes/no/' /etc/ssh/sshd_config
 fi
-
-systemctl restart ssh

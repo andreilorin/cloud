@@ -5,22 +5,46 @@
     max_clients: 200
   remote_user: root
   tasks:
+  - name: ensure haproxy is at the latest version
+    yum:
+      name: haproxy
+      state: latest
+  - name: ensure haproxy is running
+    service:
+      name: haproxy
+      state: started
   - name: ensure nginx is at the latest version
     yum:
       name: nginx
       state: latest
-#  - name: write the nginx config file
-#    template:
-#      src: /srv/nginx.conf
-#      dest: /etc/nginx.conf
-    notify:
-    - restart nginx
   - name: ensure nginx is running
     service:
       name: nginx
       state: started
+  - name: copy user setup script
+    copy:
+      src: ../bash/user_setup.sh
+      dest: $HOME/user_setup.sh
+      owner: root
+      group: root
+      mode: 0700
+  - name: run user setup script
+    shell: $HOME/user_setup.sh andrei
+    notify:
+      - restart sshd
+#  - name: write the nginx config file
+#    template:
+#      src: /srv/nginx.conf
+#      dest: /etc/nginx.conf
+#    notify:
+#    - restart nginx
+
   handlers:
   - name: restart nginx
     service:
       name: nginx
+      state: restarted
+  - name: restart sshd
+    service:
+      name: ssh
       state: restarted
