@@ -5,16 +5,17 @@ services:
   jenkins:
     image: 'jenkins/jenkins:lts'
     container_name: jenkins
+#    volumes:
+#      - 'jenkins_volume:/var/jenkins_home'
     ports:
       - '13000:8080'
-    volumes:
-      - 'jenkins-volume:/var/jenkins_home'
+      - '5000:5000'
     networks:
       - localcicd
-    restart: always
+#    restart: always
 
   docker-proxy:
-    image: 'shipyard/docker-proxy'
+    image: 'shipyard/docker-proxy' 
     container_name: docker-proxy
     ports:
       - '13001:2375'
@@ -22,7 +23,7 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - localcicd
-    restart: always
+#    restart: always
 
   gitlab:
     image: 'gitlab/gitlab-ce:latest'
@@ -39,7 +40,19 @@ services:
       - $HOME/dev/docker-volumes/gitlab/logs:/var/log/gitlab
     networks:
       - localcicd
-    restart: always
+#    restart: always
+
+  vault:
+    image: 'vault'
+    container_name: vault
+    ports:
+      - '13009:8200'
+    cap_add:
+      - 'IPC_LOCK'
+    networks:
+      - localcicd
+#    volumes:
+
 
   keycloak:
     image: 'quay.io/keycloak/keycloak:latest'
@@ -47,11 +60,11 @@ services:
     ports:
       - '13003:8080'
     environment:
-      - KEYCLOAK_USER=admin       # TODO use env var
-      - KEYCLOAK_PASSWORD=admin   # TODO use env var
+      - KEYCLOAK_USER=admin       # TODO use env var. or vault
+      - KEYCLOAK_PASSWORD=admin   # TODO use env var. or vault
     networks:
       - localcicd
-    restart: always
+#    restart: always
 
   sonarqube:
     image: 'sonarqube'
@@ -59,10 +72,10 @@ services:
     ports:
       - '13004:9000'
     volumes:
-      - 'sonarqube-volume:/opt/sonarqube'
+      - 'sonarqube-volume:/opt/sonarqube' # TODO change named volume to host volume
     networks:
       - localcicd
-    restart: always
+#    restart: always
 
   artifactory:
     image: 'docker.bintray.io/jfrog/artifactory-oss:latest'
@@ -71,10 +84,10 @@ services:
       - '13005:8081'
       - '13006:8082'
     volumes:
-      - 'artifactory-volume:/var/opt/jfrog/artifactory' # change named volume to host volume
+      - 'artifactory-volume:/var/opt/jfrog/artifactory' # TODO change named volume to host volume. get article from work laptop
     networks:
       - localcicd
-    restart: always
+#    restart: always
 
   nexus:
     image: 'sonatype/nexus3'
@@ -82,10 +95,10 @@ services:
     ports:
       - '13007:8081'
     volumes:
-      - 'nexus-volume:/nexus-data'
+      - 'nexus-volume:/nexus-data' # TODO change named volume to host volume. get article from work laptop
     networks:
       - localcicd
-    restart: always
+##    restart: always
 
   portainer:
     image: 'portainer/portainer-ce'
@@ -95,14 +108,25 @@ services:
       - '13008:9000'
     volumes:
     - '/var/run/docker.sock:/var/run/docker.sock'
-    - 'portainer_data:/data' # change named volume to host volume
+    - 'portainer-data:/data' # TODO change named volume to host volume. get article from work laptop
+
 
 volumes:
   artifactory-volume:
-  jenkins-volume:
+#  jenkins-volume:
   nexus-volume:
-  portainer_data:
+  portainer-data:
   sonarqube-volume:
 
 networks:
   localcicd:
+
+# kafka
+# add ctop https://github.com/bcicen/ctop
+# add dive https://github.com/wagoodman/dive
+# ldd, strings, upx
+# postgresql
+# cassandra
+# elastic services
+
+# TODO watch oracle twitch recording
